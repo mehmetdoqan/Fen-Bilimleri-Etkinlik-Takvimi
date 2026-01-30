@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fen Bilimleri Etkinlik Takvimi</title>
+  <style>
+    :root{
+      --blue-900:#1e3a8a;
+      --blue-700:#1d4ed8;
+      --border:#bfdbfe;
+      --card:#ffffff;
+      --bg1:#eff6ff;
+      --bg2:#ffffff;
+      --warn-bg:#fef9c3;
+      --warn-border:#facc15;
+      --text:#0f172a;
+      --muted:#475569;
+      --shadow: 0 10px 20px rgba(2,6,23,.08);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+    }
+    .wrap{ max-width: 860px; margin: 0 auto; padding: 24px 16px 40px; }
+    h1{
+      margin: 4px 0 18px;
+      text-align:center;
+      font-size: 28px;
+      color: var(--blue-900);
+      font-weight: 900;
+    }
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .grid{ display:grid; grid-template-columns: 1fr; gap: 14px; }
+    @media(min-width:720px){ .grid{ grid-template-columns: 1fr 1fr; } }
+
+    label{
+      display:block;
+      color: var(--blue-900);
+      font-weight: 800;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    select{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fbff;
+      font-size: 15px;
+      outline:none;
+    }
+    select:focus{
+      border-color: var(--blue-700);
+      box-shadow: 0 0 0 3px rgba(29,78,216,.15);
+    }
+    select:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .result-area{ margin-top: 18px; }
+    .warn{
+      border: 2px solid var(--warn-border);
+      background: var(--warn-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      color:#854d0e;
+      font-weight: 800;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .badge{
+      display:inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--blue-900);
+      background: #eff6ff;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .title{
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--blue-900);
+      margin: 4px 0 10px;
+    }
+    .row{ margin: 8px 0; line-height: 1.45; }
+    .row b{ color: var(--muted); }
+
+    .links a{
+      color: var(--blue-700);
+      font-weight: 900;
+      text-decoration: underline;
+    }
+    a.disabled{
+      pointer-events:none;
+      opacity:.55;
+      text-decoration:none;
+      cursor:not-allowed;
+    }
+
+    .kazanım{
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>📘 Fen Bilimleri Etkinlik Takvimi</h1>
+
+    <div class="panel">
+      <div class="grid">
+        <div>
+          <label for="sinifSelect">Sınıf Seçiniz:</label>
+          <select id="sinifSelect">
+            <option value="">Sınıf seçiniz</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="aySelect">Ay Seçiniz:</label>
+          <select id="aySelect" disabled>
+            <option value="">Önce sınıf seçiniz</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-area" id="resultArea">
+      <div class="warn">Etkinlikleri görmek için önce sınıf sonra ay seçiniz.</div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Excel'den dönüştürülen tüm veri (format: data[sinif][ay] = {unite, etkinlik, aciklama, kazanim, pdf, video})
+    const data = {
+  "Anaokulu": {
+    "Eylül": {
+      "etkinlik": "Mikroskopla Meyve İnceleme",
+      "unite": "Duyu Keşfi",
+      "kazanim": "Duyu organlarını tanır",
+      "aciklama": "Duyu Keşfi ünitesi kapsamında Mikroskopla Meyve İnceleme etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Gölge Oyunu",
+      "unite": "Işıkla Tanışıyorum",
+      "kazanim": "Gölgenin oluştuğunu fark eder",
+      "aciklama": "Işıkla Tanışıyorum ünitesi kapsamında Gölge Oyunu etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Su Döngüsü Şişesi",
+      "unite": "Hava ve Su",
+      "kazanim": "Yağmurun oluşumunu taklit eder",
+      "aciklama": "Hava ve Su ünitesi kapsamında Su Döngüsü Şişesi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Duyu Kartları Eşleştirme",
+      "unite": "Duyu Organları",
+      "kazanim": "Duyu organlarını işlevine göre ayırt eder",
+      "aciklama": "Duyu Organları ünitesi kapsamında Duyu Kartları Eşleştirme etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "Kar Tanesi Kesme",
+      "unite": "Hava Olayları",
+      "kazanim": "Kar yağışını tanır",
+      "aciklama": "Hava Olayları ünitesi kapsamında Kar Tanesi Kesme etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Titreşimli Balon Deneyi",
+      "unite": "Sesin Kaynağı",
+      "kazanim": "Sesin titreşimle oluştuğunu fark eder",
+      "aciklama": "Sesin Kaynağı ünitesi kapsamında Titreşimli Balon Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Sesin Yönü Oyunu",
+      "unite": "Ses ve Işık",
+      "kazanim": "Sesin kaynağını belirler",
+      "aciklama": "Ses ve Işık ünitesi kapsamında Sesin Yönü Oyunu etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Tohum Ekimi",
+      "unite": "Canlılar Büyür",
+      "kazanim": "Bitkilerin büyüme koşullarını fark eder",
+      "aciklama": "Canlılar Büyür ünitesi kapsamında Tohum Ekimi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Renkli Çiçek Deneyi",
+      "unite": "Bitkiler",
+      "kazanim": "Su ile renklerin çiçekte yayılmasını gözlemler",
+      "aciklama": "Bitkiler ünitesi kapsamında Renkli Çiçek Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Doğa Yürüyüşü – Gözlem",
+      "unite": "Gözlem Becerisi",
+      "kazanim": "Canlı ve cansız varlıkları ayırt eder",
+      "aciklama": "Gözlem Becerisi ünitesi kapsamında Doğa Yürüyüşü – Gözlem etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "1": {
+    "Eylül": {
+      "etkinlik": "Balonla Ses Deneyi",
+      "unite": "Maddeyi Tanıyalım",
+      "kazanim": "Maddeleri gözlemler",
+      "aciklama": "Maddeyi Tanıyalım ünitesi kapsamında Balonla Ses Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Renk Karışımı Deneyi",
+      "unite": "Maddeyi Tanıyalım",
+      "kazanim": "Renkleri karıştırarak yeni renkler elde eder",
+      "aciklama": "Maddeyi Tanıyalım ünitesi kapsamında Renk Karışımı Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Minik Sera Deneyi",
+      "unite": "Bitkileri Tanıyalım",
+      "kazanim": "Bitkilerin büyüme ortamını açıklar",
+      "aciklama": "Bitkileri Tanıyalım ünitesi kapsamında Minik Sera Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Tat Testi Deneyi",
+      "unite": "Varlıkları Tanıyalım",
+      "kazanim": "Tatları ayırt eder",
+      "aciklama": "Varlıkları Tanıyalım ünitesi kapsamında Tat Testi Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "Termometre Yapımı",
+      "unite": "Maddeyi Tanıyalım",
+      "kazanim": "Sıcaklık farkını açıklar",
+      "aciklama": "Maddeyi Tanıyalım ünitesi kapsamında Termometre Yapımı etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Rüzgar Gülü",
+      "unite": "Hava Olayları",
+      "kazanim": "Rüzgarın yönünü keşfeder",
+      "aciklama": "Hava Olayları ünitesi kapsamında Rüzgar Gülü etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Gece-Gündüz Modeli",
+      "unite": "Gök Cisimleri",
+      "kazanim": "Güneş’in ve Dünya’nın hareketlerini ayırt eder",
+      "aciklama": "Gök Cisimleri ünitesi kapsamında Gece-Gündüz Modeli etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Yağmur Oluşumu Deneyi",
+      "unite": "Hava Olayları",
+      "kazanim": "Yağmurun nasıl oluştuğunu açıklar",
+      "aciklama": "Hava Olayları ünitesi kapsamında Yağmur Oluşumu Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Gölge Boyu Ölçümü",
+      "unite": "Işık ve Gölge",
+      "kazanim": "Gölgenin boyunun değiştiğini fark eder",
+      "aciklama": "Işık ve Gölge ünitesi kapsamında Gölge Boyu Ölçümü etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Duyu Posteri Hazırlama",
+      "unite": "Duyu Organları",
+      "kazanim": "Duyu organlarını ve işlevlerini açıklar",
+      "aciklama": "Duyu Organları ünitesi kapsamında Duyu Posteri Hazırlama etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "2": {
+    "Eylül": {
+      "etkinlik": "Suda Yüzen-Batan Cisimler",
+      "unite": "Kuvveti Tanıyalım",
+      "kazanim": "Yüzen-batan maddeleri ayırt eder",
+      "aciklama": "Kuvveti Tanıyalım ünitesi kapsamında Suda Yüzen-Batan Cisimler etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Mıknatısla Çekme Deneyi",
+      "unite": "Kuvveti Tanıyalım",
+      "kazanim": "Mıknatısların bazı maddeleri çektiğini keşfeder",
+      "aciklama": "Kuvveti Tanıyalım ünitesi kapsamında Mıknatısla Çekme Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Mıknatısla Ayırma",
+      "unite": "Kuvveti Tanıyalım",
+      "kazanim": "Mıknatısla ayrıştırma yapar",
+      "aciklama": "Kuvveti Tanıyalım ünitesi kapsamında Mıknatısla Ayırma etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Yön Bulma Kutusu",
+      "unite": "Yönelim Becerileri",
+      "kazanim": "Basit yön kavramlarını kullanır",
+      "aciklama": "Yönelim Becerileri ünitesi kapsamında Yön Bulma Kutusu etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "Balonla Hava Gücü",
+      "unite": "Hava Kuvvetleri",
+      "kazanim": "Balonla hava gücünü keşfeder",
+      "aciklama": "Hava Kuvvetleri ünitesi kapsamında Balonla Hava Gücü etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Isınan Hava Balonu",
+      "unite": "Maddenin Hâlleri",
+      "kazanim": "Isınan havanın yükseldiğini açıklar",
+      "aciklama": "Maddenin Hâlleri ünitesi kapsamında Isınan Hava Balonu etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Çiçek Parçalarını Tanıma",
+      "unite": "Bitkiler",
+      "kazanim": "Bitkilerin kısımlarını tanır",
+      "aciklama": "Bitkiler ünitesi kapsamında Çiçek Parçalarını Tanıma etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Balıklar Neden Batar?",
+      "unite": "Canlılar ve Su",
+      "kazanim": "Balıkların yüzmesini etkileyen özellikleri keşfeder",
+      "aciklama": "Canlılar ve Su ünitesi kapsamında Balıklar Neden Batar? etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Geri Dönüşüm Oyunu",
+      "unite": "Geri Dönüşüm",
+      "kazanim": "Atıkları geri dönüşümle değerlendirme bilinci kazanır",
+      "aciklama": "Geri Dönüşüm ünitesi kapsamında Geri Dönüşüm Oyunu etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Güneş Enerjisi Kutusu",
+      "unite": "Güneş Enerjisi",
+      "kazanim": "Güneş ışığının ısı ve ışık verdiğini fark eder",
+      "aciklama": "Güneş Enerjisi ünitesi kapsamında Güneş Enerjisi Kutusu etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "3": {
+    "Eylül": {
+      "etkinlik": "Canlıları Sınıflandıralım",
+      "unite": "Canlılar Dünyası",
+      "kazanim": "Canlıları benzerliklerine göre gruplar",
+      "aciklama": "Canlılar Dünyası ünitesi kapsamında Canlıları Sınıflandıralım etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Su buharı – Hâl değişimi",
+      "unite": "Maddeyi Tanıyalım",
+      "kazanim": "Maddenin hâl değişimini gözlemler",
+      "aciklama": "Maddeyi Tanıyalım ünitesi kapsamında Su buharı – Hâl değişimi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Ses Kaynağını Bulma",
+      "unite": "Sesin Kaynağı",
+      "kazanim": "Sesin titreşimle oluştuğunu fark eder",
+      "aciklama": "Sesin Kaynağı ünitesi kapsamında Ses Kaynağını Bulma etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Bitki Çimlendirme",
+      "unite": "Canlıların Yaşamı",
+      "kazanim": "Tohumun büyümesini gözlemler",
+      "aciklama": "Canlıların Yaşamı ünitesi kapsamında Bitki Çimlendirme etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "Ayna ile Yansıma",
+      "unite": "Işık ve Ses",
+      "kazanim": "Yansımanın yönünü keşfeder",
+      "aciklama": "Işık ve Ses ünitesi kapsamında Ayna ile Yansıma etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Hâl Değişimi Takibi",
+      "unite": "Maddenin Değişimi",
+      "kazanim": "Madde hâl değiştirirken gözlem yapar",
+      "aciklama": "Maddenin Değişimi ünitesi kapsamında Hâl Değişimi Takibi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Basit Makine Gözlemi",
+      "unite": "Kuvveti Tanıyalım",
+      "kazanim": "Basit makineleri fark eder",
+      "aciklama": "Kuvveti Tanıyalım ünitesi kapsamında Basit Makine Gözlemi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Bitki Yapısı İncelemesi",
+      "unite": "Canlıların Yaşam Döngüsü",
+      "kazanim": "Bitkinin kısımlarını tanır",
+      "aciklama": "Canlıların Yaşam Döngüsü ünitesi kapsamında Bitki Yapısı İncelemesi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Işığın Yönü Deneyi",
+      "unite": "Işık ve Madde",
+      "kazanim": "Işığın doğrusal yayıldığını fark eder",
+      "aciklama": "Işık ve Madde ünitesi kapsamında Işığın Yönü Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Yaprak Hücresi İncelemesi",
+      "unite": "Bitkiler",
+      "kazanim": "Yaprağın mikroskop görüntüsünü analiz eder",
+      "aciklama": "Bitkiler ünitesi kapsamında Yaprak Hücresi İncelemesi etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "4": {
+    "Eylül": {
+      "etkinlik": "Simetri ve Ayna Deneyi",
+      "unite": "Aydınlatma ve Ses Teknolojileri",
+      "kazanim": "Aynada görüntünün yönünü keşfeder",
+      "aciklama": "Aydınlatma ve Ses Teknolojileri ünitesi kapsamında Simetri ve Ayna Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Basit Elektrik Devresi Kurma",
+      "unite": "Elektrik Devreleri",
+      "kazanim": "Devre elemanlarını tanır ve devre kurar",
+      "aciklama": "Elektrik Devreleri ünitesi kapsamında Basit Elektrik Devresi Kurma etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Yağmur Oluşumu Deneyi",
+      "unite": "Su Döngüsü",
+      "kazanim": "Yoğunlaşma ve yağış olaylarını gözlemler",
+      "aciklama": "Su Döngüsü ünitesi kapsamında Yağmur Oluşumu Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Yüzey Gerilimi Deneyi",
+      "unite": "Maddenin Özellikleri",
+      "kazanim": "Yüzey gerilimini gözlemler",
+      "aciklama": "Maddenin Özellikleri ünitesi kapsamında Yüzey Gerilimi Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "Geri Dönüşüm Ayırma",
+      "unite": "Doğal Kaynakların Korunması",
+      "kazanim": "Atıkları sınıflandırır",
+      "aciklama": "Doğal Kaynakların Korunması ünitesi kapsamında Geri Dönüşüm Ayırma etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Elektrik Akımı Deneyi",
+      "unite": "Elektrik Devreleri",
+      "kazanim": "Elektrik akımının yönünü tanımlar",
+      "aciklama": "Elektrik Devreleri ünitesi kapsamında Elektrik Akımı Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Gölge Oluşumu Deneyi",
+      "unite": "Işık ve Madde",
+      "kazanim": "Gölge boyunun ışık açısına bağlı olduğunu fark eder",
+      "aciklama": "Işık ve Madde ünitesi kapsamında Gölge Oluşumu Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Su Arıtımı Deneyi",
+      "unite": "Su ve Çevre",
+      "kazanim": "Suyun arıtılabilirliğini gözlemler",
+      "aciklama": "Su ve Çevre ünitesi kapsamında Su Arıtımı Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Kaldırma Kuvveti Deneyi",
+      "unite": "Kuvvet ve Hareket",
+      "kazanim": "Suyun cisimlere kaldırma kuvveti uyguladığını fark eder",
+      "aciklama": "Kuvvet ve Hareket ünitesi kapsamında Kaldırma Kuvveti Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Basit Elektrikli Araç Yapımı",
+      "unite": "Elektrik Devreleri",
+      "kazanim": "Elektrik enerjisinin hareket sağladığını gözlemler",
+      "aciklama": "Elektrik Devreleri ünitesi kapsamında Basit Elektrikli Araç Yapımı etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "5": {
+    "Eylül": {
+      "etkinlik": "Ay’ın Evrelerini Modelleme",
+      "unite": "Güneş, Dünya ve Ay",
+      "kazanim": "Ay’ın evrelerini sıralar ve model yapar",
+      "aciklama": "Güneş, Dünya ve Ay ünitesi kapsamında Ay’ın Evrelerini Modelleme etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Ay’ın Neden Aynı Yüzü Görünür",
+      "unite": "Güneş, Dünya ve Ay",
+      "kazanim": "Ay’ın kendi ekseni etrafındaki dönüşünü yorumlar",
+      "aciklama": "Güneş, Dünya ve Ay ünitesi kapsamında Ay’ın Neden Aynı Yüzü Görünür etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Dinamometre Modeli Yapımı",
+      "unite": "Kuvvet ve Hareket",
+      "kazanim": "Kuvveti ölçmede dinamometre kullanır",
+      "aciklama": "Kuvvet ve Hareket ünitesi kapsamında Dinamometre Modeli Yapımı etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Kuvvetin Yönü Deneyi",
+      "unite": "Kuvvet ve Hareket",
+      "kazanim": "Kuvvetin yönünü belirler",
+      "aciklama": "Kuvvet ve Hareket ünitesi kapsamında Kuvvetin Yönü Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "Kütle-Ağırlık Deneyi",
+      "unite": "Kütle ve Ağırlık",
+      "kazanim": "Kütle ile ağırlık arasındaki farkı açıklar",
+      "aciklama": "Kütle ve Ağırlık ünitesi kapsamında Kütle-Ağırlık Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Sürtünme Testi (halı-tahta)",
+      "unite": "Kuvvet ve Hareket",
+      "kazanim": "Farklı yüzeylerdeki sürtünmeyi karşılaştırır",
+      "aciklama": "Kuvvet ve Hareket ünitesi kapsamında Sürtünme Testi (halı-tahta) etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Kuvvet Ölçümü Deneyi",
+      "unite": "Kuvvetin Ölçülmesi",
+      "kazanim": "Dinamometre ile kuvvet ölçer",
+      "aciklama": "Kuvvetin Ölçülmesi ünitesi kapsamında Kuvvet Ölçümü Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Ay Neden Aynı Yüzünü Gösterir?",
+      "unite": "Güneş, Dünya ve Ay",
+      "kazanim": "Ay’ın hareketine bağlı olarak görünümünün değiştiğini açıklar",
+      "aciklama": "Güneş, Dünya ve Ay ünitesi kapsamında Ay Neden Aynı Yüzünü Gösterir? etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Hareket Oyunu (itme-çekme)",
+      "unite": "Kuvvetin Yönü",
+      "kazanim": "Kuvvetin yönünü belirleyerek hareketi tanımlar",
+      "aciklama": "Kuvvetin Yönü ünitesi kapsamında Hareket Oyunu (itme-çekme) etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Hâl Değişim Sunumu",
+      "unite": "Maddenin Hâlleri",
+      "kazanim": "Madde hâl değiştirirken sıcaklıkla ilişkisini fark eder",
+      "aciklama": "Maddenin Hâlleri ünitesi kapsamında Hâl Değişim Sunumu etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "6": {
+    "Eylül": {
+      "etkinlik": "Hücre Modeli Yapımı",
+      "unite": "Canlılar ve Yaşam",
+      "kazanim": "Hücreyi ve organelleri tanır",
+      "aciklama": "Canlılar ve Yaşam ünitesi kapsamında Hücre Modeli Yapımı etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Kandaki Oksijen Modeli",
+      "unite": "Vücudumuzdaki Sistemler",
+      "kazanim": "Alyuvarların görevini açıklar",
+      "aciklama": "Vücudumuzdaki Sistemler ünitesi kapsamında Kandaki Oksijen Modeli etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Sürtünme Yüzeyi Deneyi",
+      "unite": "Kuvvet ve Hareket",
+      "kazanim": "Farklı yüzeylerde sürtünmenin etkisini gözlemler",
+      "aciklama": "Kuvvet ve Hareket ünitesi kapsamında Sürtünme Yüzeyi Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Kan Dolaşımı Şeması",
+      "unite": "Vücudumuzdaki Sistemler",
+      "kazanim": "Kalbin görevini açıklar",
+      "aciklama": "Vücudumuzdaki Sistemler ünitesi kapsamında Kan Dolaşımı Şeması etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "Besin İçerik Analizi",
+      "unite": "Gıdaların Vücuttaki Rolü",
+      "kazanim": "Karbonhidrat, protein vb. içerikleri sınıflandırır",
+      "aciklama": "Gıdaların Vücuttaki Rolü ünitesi kapsamında Besin İçerik Analizi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Akciğer Modeli (Balon)",
+      "unite": "Vücudumuzdaki Sistemler",
+      "kazanim": "Solunum sistemi organlarını tanımlar",
+      "aciklama": "Vücudumuzdaki Sistemler ünitesi kapsamında Akciğer Modeli (Balon) etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Sindirim Sistemi Aşamaları",
+      "unite": "Vücudumuzdaki Sistemler",
+      "kazanim": "Besinlerin sindirim sürecini açıklar",
+      "aciklama": "Vücudumuzdaki Sistemler ünitesi kapsamında Sindirim Sistemi Aşamaları etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Biyoteknoloji Afişi",
+      "unite": "Canlılar ve Yaşam",
+      "kazanim": "Biyoteknolojinin kullanım alanlarını tanır",
+      "aciklama": "Canlılar ve Yaşam ünitesi kapsamında Biyoteknoloji Afişi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Solunum-Kalp İlişkisi Posteri",
+      "unite": "Vücudumuzdaki Sistemler",
+      "kazanim": "Egzersizin kalp ve solunum üzerindeki etkisini açıklar",
+      "aciklama": "Vücudumuzdaki Sistemler ünitesi kapsamında Solunum-Kalp İlişkisi Posteri etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Güneş Sistemi Maketi",
+      "unite": "Güneş Sistemi",
+      "kazanim": "Güneş sisteminde gezegenleri sıralar",
+      "aciklama": "Güneş Sistemi ünitesi kapsamında Güneş Sistemi Maketi etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "7": {
+    "Eylül": {
+      "etkinlik": "Isı ile Genleşme Deneyi",
+      "unite": "Kuvvet ve Enerji",
+      "kazanim": "Isı ile genleşmeyi açıklar",
+      "aciklama": "Kuvvet ve Enerji ünitesi kapsamında Isı ile Genleşme Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ekim": {
+      "etkinlik": "Rüzgar Türbini Maketi",
+      "unite": "Enerji Dönüşümleri",
+      "kazanim": "Yenilenebilir enerji kaynaklarını tanır",
+      "aciklama": "Enerji Dönüşümleri ünitesi kapsamında Rüzgar Türbini Maketi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Kasım": {
+      "etkinlik": "Tel-Frekans İlişkisi Deneyi",
+      "unite": "Enerji Dönüşümleri",
+      "kazanim": "Telin cinsine göre frekans farkını keşfeder",
+      "aciklama": "Enerji Dönüşümleri ünitesi kapsamında Tel-Frekans İlişkisi Deneyi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Aralık": {
+      "etkinlik": "Sindirim Sistemi Posteri",
+      "unite": "Sindirim Sistemi",
+      "kazanim": "Sindirim organlarını sıralar ve işlevlerini açıklar",
+      "aciklama": "Sindirim Sistemi ünitesi kapsamında Sindirim Sistemi Posteri etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Ocak": {
+      "etkinlik": "DNA Modeli",
+      "unite": "Genetik",
+      "kazanim": "DNA’nın yapısını modeller",
+      "aciklama": "Genetik ünitesi kapsamında DNA Modeli etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Şubat": {
+      "etkinlik": "Asit-Baz Testi",
+      "unite": "Maddenin Tanecikli Yapısı",
+      "kazanim": "Asit ve bazların özelliklerini ayırt eder",
+      "aciklama": "Maddenin Tanecikli Yapısı ünitesi kapsamında Asit-Baz Testi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mart": {
+      "etkinlik": "Kimyasal Değişim Gözlemi",
+      "unite": "Maddenin Yapısı ve Özellikleri",
+      "kazanim": "Kimyasal değişimlere örnek verir",
+      "aciklama": "Maddenin Yapısı ve Özellikleri ünitesi kapsamında Kimyasal Değişim Gözlemi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Nisan": {
+      "etkinlik": "Enerji Dönüşüm Devresi",
+      "unite": "Enerji Dönüşümleri",
+      "kazanim": "Enerji türleri arasında dönüşüm yapar",
+      "aciklama": "Enerji Dönüşümleri ünitesi kapsamında Enerji Dönüşüm Devresi etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Mayıs": {
+      "etkinlik": "Periyodik Tablo Kart Oyunu",
+      "unite": "Maddenin Yapısı ve Elementler",
+      "kazanim": "Elementleri sembolleriyle tanır",
+      "aciklama": "Maddenin Yapısı ve Elementler ünitesi kapsamında Periyodik Tablo Kart Oyunu etkinliği.",
+      "pdf": "",
+      "video": ""
+    },
+    "Haziran": {
+      "etkinlik": "Hücre Bölünmesi Modeli",
+      "unite": "Hücre ve Bölünme",
+      "kazanim": "Mitoz bölünmenin aşamalarını açıklar",
+      "aciklama": "Hücre ve Bölünme ünitesi kapsamında Hücre Bölünmesi Modeli etkinliği.",
+      "pdf": "",
+      "video": ""
+    }
+  },
+  "8": {}
+};
+
+    const AY_SIRASI = ["Eylül", "Ekim", "Kasım", "Aralık", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran"];
+    const SINIF_SIRASI = ["Anaokulu", "1", "2", "3", "4", "5", "6", "7", "8"];
+
+    const sinifSelect = document.getElementById("sinifSelect");
+    const aySelect = document.getElementById("aySelect");
+    const resultArea = document.getElementById("resultArea");
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function escapeAttr(str){
+      return String(str ?? "#").replaceAll('"',"&quot;");
+    }
+
+    function showWarn(text){
+      resultArea.innerHTML = `<div class="warn">${escapeHtml(text)}</div>`;
+    }
+
+    function populateSiniflar(){
+      for (const s of SINIF_SIRASI){
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = (s === "Anaokulu") ? "Anaokulu" : `${s}. Sınıf`;
+        sinifSelect.appendChild(opt);
+      }
+    }
+
+    function resetAySelect(message){
+      aySelect.innerHTML = "";
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = message;
+      aySelect.appendChild(opt);
+      aySelect.value = "";
+    }
+
+    function populateAylar(){
+      resetAySelect("Ay seçiniz");
+      for (const ay of AY_SIRASI){
+        const opt = document.createElement("option");
+        opt.value = ay;
+        opt.textContent = ay;
+        aySelect.appendChild(opt);
+      }
+    }
+
+    function renderSonuc(sinif, ay){
+      const rec = data?.[sinif]?.[ay];
+      if (!rec){
+        showWarn("Bu sınıf ve ay için henüz etkinlik verisi yok.");
+        return;
+      }
+
+      const unite = rec.unite ?? "—";
+      const etkinlik = rec.etkinlik ?? "—";
+      const aciklama = rec.aciklama ?? "—";
+      const kazanim = rec.kazanim ?? "—";
+
+      const pdf = rec.pdf ?? "";
+      const video = rec.video ?? "";
+
+      const pdfHref = pdf ? escapeAttr(pdf) : "#";
+      const videoHref = video ? escapeAttr(video) : "#";
+
+      resultArea.innerHTML = `
+        <div class="card">
+          <div class="badge">Ünite: ${escapeHtml(unite)}</div>
+          <div class="title">🎯 Etkinlik: ${escapeHtml(etkinlik)}</div>
+
+          <div class="row"><b>📝 Açıklama:</b> ${escapeHtml(aciklama)}</div>
+
+          <div class="row links"><b>📄 PDF:</b>
+            <a class="${pdf ? "" : "disabled"}" href="${pdfHref}" target="_blank" rel="noreferrer">Döküman indir</a>
+          </div>
+
+          <div class="row links"><b>🎬 Video:</b>
+            <a class="${video ? "" : "disabled"}" href="${videoHref}" target="_blank" rel="noreferrer">Video linki</a>
+          </div>
+
+          <div class="kazanım row">
+            <b>✅ Kazanım:</b> ${escapeHtml(kazanim)}
+          </div>
+        </div>
+      `;
+    }
+
+    sinifSelect.addEventListener("change", () => {
+      const sinif = sinifSelect.value;
+
+      if (!sinif) {
+        aySelect.disabled = true;
+        resetAySelect("Önce sınıf seçiniz");
+        showWarn("Etkinlikleri görmek için önce sınıf sonra ay seçiniz.");
+        return;
+      }
+
+      aySelect.disabled = false;
+      populateAylar();
+      showWarn("Ay seçiniz.");
+    });
+
+    aySelect.addEventListener("change", () => {
+      const sinif = sinifSelect.value;
+      const ay = aySelect.value;
+
+      if (!sinif || !ay) {
+        showWarn("Etkinlikleri görmek için önce sınıf sonra ay seçiniz.");
+        return;
+      }
+
+      renderSonuc(sinif, ay);
+    });
+
+    populateSiniflar();
+  </script>
+</body>
+</html>
