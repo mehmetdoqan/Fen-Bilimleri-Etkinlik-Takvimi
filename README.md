@@ -25,6 +25,8 @@ Tek bir `index.html` dosyası ile çalışır ve **GitHub Pages** uyumludur.
 - ✅ Mobil ve masaüstü uyumlu tasarım
 - ✅ Framework yok (React, Vue vb. **yok**)
 
+Lİnk: 
+https://mehmetdoqan.github.io/Fen-Bilimleri-Etkinlik-Takvimi/
 
 ## 🧱 Kullanılan Teknolojiler
 
@@ -39,5 +41,4 @@ Tek bir `index.html` dosyası ile çalışır ve **GitHub Pages** uyumludur.
 /
 ├── index.html
 └── README.md
-Lİnk: 
-https://mehmetdoqan.github.io/Fen-Bilimleri-Etkinlik-Takvimi/
+
